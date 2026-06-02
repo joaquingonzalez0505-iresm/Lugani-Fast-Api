@@ -1,37 +1,32 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+import crud
+import schemas
+from database import get_db
 
 app = FastAPI()
 
-# Definición del modelo de datos para validación
-class Producto(BaseModel):
-    nombre: str
-    precio: float
-    en_stock: bool
+# --- Endpoints de Productos ---
 
-# Base de datos en memoria (Lista de objetos Producto)
-productos = []
+@app.get("/productos", response_model=list[schemas.ProductoResponse])
+def listar_productos(db: Session = Depends(get_db)):
+    return crud.obtainer_productos(db)
 
-# 1. LISTAR PRODUCTOS (GET)
-@app.get("/productos")
-def listar_productos():
-    return {"productos": productos}
+@app.post("/productos", response_model=schemas.ProductoCreate)
+def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
+    return crud.crear_producto(db, producto)
 
-# 2. AGREGAR PRODUCTO CON MODELO (POST)
-@app.post("/productos")
-def agregar_producto(producto: Producto):
-    productos.append(producto)
-    return {"mensaje": "Producto agregado", "producto": producto}
+@app.put("/productos/{id}", response_model=schemas.ProductoCreate)
+def actualizar_producto(id: int, datos: schemas.ProductoCreate, db: Session = Depends(get_db)):
+    producto = crud.actualizar_producto(db, producto_id=id, datos=datos)
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return producto
 
-# 3. ACTUALIZAR PRODUCTO (PUT)
-# Nota: El documento mantiene la actualización simple por nombre en esta sección
-@app.put("/productos/{id}")
-def actualizar_producto(id: int, nombre: str):
-    productos[id] = nombre
-    return {"mensaje": "Producto actualizado", "producto": nombre}
-
-# 4. ELIMINAR PRODUCTO (DELETE)
 @app.delete("/productos/{id}")
-def eliminar_producto(id: int):
-    eliminado = productos.pop(id)
-    return {"mensaje": "Producto eliminado", "producto": eliminado}
+def eliminar_producto(id: int, db: Session = Depends(get_db)):
+    producto = crud.eliminar_producto(db, producto_id=id)
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return {"mensaje": "Producto eliminado"}
+
