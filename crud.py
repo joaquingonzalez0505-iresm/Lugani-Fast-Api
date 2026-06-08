@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from models import Producto, Categoria
 from schemas import ProductoCreate, CategoriaCreate
 
-# --- CRUD de Productos ---
 def crear_producto(db: Session, producto: ProductoCreate):
     db_producto = Producto(**producto.dict())
     db.add(db_producto)
@@ -10,29 +9,28 @@ def crear_producto(db: Session, producto: ProductoCreate):
     db.refresh(db_producto)
     return db_producto
 
+
 def obtener_productos(db: Session):
     return db.query(Producto).all()
 
+
 def obtener_producto(db: Session, producto_id: int):
-    return db.query(Producto).filter(Producto.id == producto_id).first()
+    return db.query(Producto).filter( Producto.id == producto_id ).first()
+
 
 def actualizar_producto(db: Session, producto_id: int, datos: ProductoCreate):
     producto = obtener_producto(db, producto_id)
-    if producto:
-        for key, value in datos.dict().items():
-            setattr(producto, key, value)
-        db.commit()
-        db.refresh(producto)
-    return producto
 
 def eliminar_producto(db: Session, producto_id: int):
     producto = obtener_producto(db, producto_id)
+    
     if producto:
         db.delete(producto)
         db.commit()
     return producto
 
-# --- CRUD de Categorías ---
+##### Categoria ###
+
 def crear_categoria(db: Session, categoria: CategoriaCreate):
     db_categoria = Categoria(nombre=categoria.nombre)
     db.add(db_categoria)
@@ -40,5 +38,12 @@ def crear_categoria(db: Session, categoria: CategoriaCreate):
     db.refresh(db_categoria)
     return db_categoria
 
-def obtener_categorias(db: Session):
+
+def obtener_categoria(db: Session):
     return db.query(Categoria).all()
+
+def obtener_categoria(db: Session):
+    return db.query(Categoria).all()
+
+
+

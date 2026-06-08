@@ -4,19 +4,21 @@ from database import Base
 
 class Categoria(Base):
     __tablename__ = "categorias"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, index=True)
-    
-    productos = relationship("Producto", back_populates="categorias")
+
+    productos = relationship("Producto", back_populates="categoria")
+
 
 class Producto(Base):
     __tablename__ = "productos"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
     precio = Column(Float)
     en_stock = Column(Boolean, default=True)
+
     categoria_id = Column(Integer, ForeignKey("categorias.id"))
-    
-    categorias = relationship("Categoria", back_populates="productos")
+
+    categoria = relationship("Categoria", back_populates="productos")

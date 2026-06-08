@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-# --- Esquemas de Producto ---
 class ProductoCreate(BaseModel):
     nombre: str
     precio: float
@@ -9,11 +8,7 @@ class ProductoCreate(BaseModel):
 
 class ProductoResponse(ProductoCreate):
     id: int
-    
-    class Config:
-        orm_mode = True
 
-# --- Esquemas de Categoría ---
 class CategoriaBase(BaseModel):
     nombre: str
 
@@ -22,6 +17,6 @@ class CategoriaCreate(CategoriaBase):
 
 class CategoriaResponse(CategoriaBase):
     id: int
-    
+
     class Config:
-        orm_mode = True
+        from_attributes = True
