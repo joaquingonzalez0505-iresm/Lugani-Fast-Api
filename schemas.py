@@ -11,7 +11,7 @@ class ProductoResponse(ProductoCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Esquemas de Categoría ---
 class CategoriaBase(BaseModel):
@@ -24,7 +24,7 @@ class CategoriaResponse(CategoriaBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 
@@ -46,7 +46,7 @@ class UsuarioResponse(UsuarioBase):
     es_admin: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str

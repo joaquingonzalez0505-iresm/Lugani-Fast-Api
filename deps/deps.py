@@ -1,13 +1,20 @@
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
-from jose import JOSEError
+from jose import JWTError
 from sqlalchemy.orm import Session
-from database import SessionLocal, get_db
-from auth import verificar_token
+from db.database import SessionLocal
+# pyrefly: ignore [missing-import]
+from app.core.security import verificar_token
 import crud
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -21,10 +28,12 @@ def get_current_user(
     
     try:
         payload = verificar_token(token)
+        if payload is None:
+            raise cred_exc
         email: str | None = payload.get("sub")
         if email is None:
             raise cred_exc
-    except JOSEError:
+    except JWTError:
         raise cred_exc
         
     user = crud.obtener_usuario_por_email(db, email)
@@ -32,7 +41,10 @@ def get_current_user(
         raise cred_exc
     return user
 
-
 def require_admin(current_user = Depends(get_current_user)):
     if not current_user.es_admin:
-        raise HTTPException(status_code=403, detail="No autorizado: se requiere rol admin")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="No autorizado: se requiere rol admin"
+        )
+    return current_user
